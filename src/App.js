@@ -13,28 +13,41 @@ function App() {
   const asyncFetchMovieHandler = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("https://swapi.dev/api/films/");
+      const response = await fetch(
+        "https://movieapp-d6140-default-rtdb.asia-southeast1.firebasedatabase.app/movies.json"
+      );
       if (!response.ok) {
         throw new Error("Something went wrong.");
       }
       const data = await response.json();
-      const transformedMovies = data.results.map((movieData) => {
-        return {
-          id: movieData.episode_id,
-          title: movieData.title,
-          openingText: movieData.opening_crawl,
-          releaseDate: movieData.release_date,
-        };
-      });
-      setMovies(transformedMovies);
+      let loadedMovies = [];
+      for (const key in data) {
+        loadedMovies.push({
+          id: key,
+          title: data[key].title,
+          openingText: data[key].openingText,
+          releaseDate: data[key].releaseDate,
+        });
+      }
+      setMovies(loadedMovies);
     } catch (error) {
       setError(error.message);
     }
     setIsLoading(false);
   }, []);
-  const addMovieHandler = (movie) => {
-    console.log(movie);
+  //Add movies
+  const addMovieHandler = async (movie) => {
+    await fetch(
+      "https://movieapp-d6140-default-rtdb.asia-southeast1.firebasedatabase.app/movies.json",
+      {
+        method: "POST",
+        body: JSON.stringify(movie),
+        headers: { "Content-type": "application/JSON" },
+      }
+    );
+    asyncFetchMovieHandler();
   };
+
   // load movies on page load
   useEffect(() => {
     asyncFetchMovieHandler();
@@ -47,7 +60,7 @@ function App() {
     content = <p>{error}</p>;
   }
   if (movies.length > 0) {
-    content = <MoviesList movies={movies} />;
+    content = <MoviesList movies={movies} fetch={asyncFetchMovieHandler} />;
   }
   if (isLoading) {
     content = <p>Loading...</p>;
