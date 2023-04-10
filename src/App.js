@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 
 import MoviesList from "./components/MoviesList";
 import "./App.css";
+import AddMovie from "./components/AddMovie";
 
 function App() {
   const [movies, setMovies] = useState([]);
@@ -31,7 +32,9 @@ function App() {
     }
     setIsLoading(false);
   }, []);
-
+  const addMovieHandler = (movie) => {
+    console.log(movie);
+  };
   // load movies on page load
   useEffect(() => {
     asyncFetchMovieHandler();
@@ -52,6 +55,9 @@ function App() {
 
   return (
     <React.Fragment>
+      <section>
+        <AddMovie onAddMovie={addMovieHandler} />
+      </section>
       <section>
         <button onClick={asyncFetchMovieHandler}>Fetch Movies</button>
       </section>
